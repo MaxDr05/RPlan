@@ -33,8 +33,6 @@ try:
     print(f'尝试打印相应内容的json格式：{response.json()}')
     print('-' * 10)
     print(f'打印请求头{response.request.headers}')
-    print('-' * 10)
-    print(f'查看相应内容{response.headers.get('Content-Type',' ')}')
 except HTTPError as err:
     print(f'出现HTTPError: {err}')
 
