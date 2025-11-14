@@ -1,0 +1,7 @@
+2025-11-15 07:46:24,254 - api_logger - INFO - login_Test - 56 -  API接口开始运行测试 
+2025-11-15 07:46:24,988 - api_logger - INFO - test_post_jsonplaceholder - 148 - ✅ 断言通过: 请求成功
+2025-11-15 07:46:24,988 - api_logger - INFO - test_post_jsonplaceholder - 150 - ✅ 断言通过: 状态码 201 符合预期
+2025-11-15 07:46:24,992 - api_logger - INFO - login_Test - 56 -  API接口开始运行测试 
+2025-11-15 07:46:25,706 - api_logger - INFO - test_post_login - 157 - ✅ 断言通过: 请求成功
+2025-11-15 07:46:25,710 - api_logger - INFO - login_Test - 56 -  API接口开始运行测试 
+2025-11-15 07:46:26,343 - api_logger - INFO - test_get_login - 164 - ✅ 断言通过: 请求成功
