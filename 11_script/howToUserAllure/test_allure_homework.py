@@ -36,7 +36,8 @@ def user_data():
             'password' : '888888888',
             'role' : 'user',
             'description' : '成功创建用户',
-            'except_result' : True
+            'except_result' : True,
+            'except_status' : 201
         },
         {
             'username' : 'Ca',
@@ -44,7 +45,8 @@ def user_data():
             'password' : '888888888',
             'role' : 'user',
             'description' : '用户名过短',
-            'except_result' : False
+            'except_result' : False,
+            'except_status' : 400
         },
         {
             'username': 'Calvin'*6,
@@ -52,7 +54,8 @@ def user_data():
             'password': '888888888',
             'role': 'user',
             'description': '用户名过长',
-            'except_result': False
+            'except_result': False,
+            'except_status' : 400
         },
         {
             'username': 'Calvin2',
@@ -60,7 +63,8 @@ def user_data():
             'password': '88',
             'role': 'user',
             'description': '密码过短',
-            'except_result': False
+            'except_result': False,
+            'except_status' : 400
         },
         {
             'username': 'Calvin3',
