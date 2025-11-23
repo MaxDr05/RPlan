@@ -1,0 +1,16 @@
+# Python 编译文件
+__pycache__/
+*.py[cod]
+
+# 虚拟环境
+.venv/
+venv/
+
+# PyCharm 配置 (可选，个人配置不上传)
+.idea/
+
+# 测试数据与结果 (根据你的实际情况)
+*.xlsx
+*.json
+*.log
+allure-results/
