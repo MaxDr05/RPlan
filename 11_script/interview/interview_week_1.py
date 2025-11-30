@@ -17,9 +17,10 @@
 # 要体现代码规范（变量命名清晰，有注释）。
 
 import openpyxl
+from typing import List, Dict, Any
 
 
-def read_excel(file_path):
+def read_excel(file_path: str) -> List[Dict[str, Any]]:
     """
     读取excel文件，读取数据,将每个用例生成为dict后打包为list
 
@@ -29,12 +30,17 @@ def read_excel(file_path):
     Returns:
         test_cases:用例字典列表
     """
-    wb = openpyxl.load_workbook(filename=file_path)
+    wb = openpyxl.load_workbook(filename=file_path, data_only=True)
     ws = wb.active
 
     test_cases = []
-    keys = {}
 
-    for cases in ws.iter_rows(min_row=2):
-        test_cases.append(zip(keys, cases))
+    # 表头获取键值
+    rows = ws.iter_rows(values_only=True)
+    keys = next(rows)
+
+    for row in rows:
+        if not all(row):
+            continue
+        test_cases.append(dict(zip(keys, row)))
     return test_cases
