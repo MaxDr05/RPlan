@@ -9,15 +9,19 @@ logging.basicConfig(
 
 
 class ReqresClient:
-    def __init__(self, host: str = "https://reqres.in"):
+    def __init__(self, host: str = "https://httpbin.org"):
         """
         初始化方法：每次实例化这个类，都会执行这里
         """
         self.host = host
         # 核心知识点：创建一个 Session 对象
         self.session = requests.Session()
-        # 模拟：给所有请求加上默认 Header，比如 User-Agent
-        self.session.headers.update({"User-Agent": "Python/Test-Dev-Week5"})
+        # 🟢 修复点：使用真实浏览器的 User-Agent
+        self.session.headers.update(
+            {
+                "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+            }
+        )
 
     def send_request(self, method: str, path: str, **kwargs) -> Optional[Dict]:
         """
@@ -28,7 +32,7 @@ class ReqresClient:
         try:
             # 注意：这里我们用 self.session 来发送请求，而不是 requests
             logging.info(f"正在请求: {method} {url}")
-            response = self.session.request(method, url, **kwargs, timeout=10)
+            response = self.session.request(method, url, **kwargs, timeout=20)
 
             # 统一的状态码检查（这里可以根据业务调整，比如统一检查 401）
             response.raise_for_status()
@@ -50,20 +54,24 @@ class ReqresClient:
 
     def list_users(self, page: int = 1) -> Optional[Dict]:
         # 只需要关注业务：路径是什么？参数是什么？
-        return self.send_request("GET", "/api/users", params={"page": page})
+        return self.send_request("GET", "/get", params={"page": page})
 
     def create_user(self, name: str, job: str) -> Optional[Dict]:
         # 只需要关注业务：传什么数据？
         payload = {"name": name, "job": job}
-        return self.send_request("POST", "/api/users", json=payload)
+        # 🟢 修复 3: 确认路径是 /post (httpbin 的接口)，千万别写成 /api/users 了
+        return self.send_request("POST", "/post", json=payload)
 
     # 留给你做作业：请按照这个模式，把 update_user 和 delete_user 补充完整
     def update_user(self, uid: int, name: str, job: str) -> Optional[Dict]:
         payload = {"name": name, "job": job}
         return self.send_request("put", f"/api/users/{uid}", json=payload)
 
-    def delete_user(self, uid: int) -> None:
-        return self.send_request("delete", f"/api/users/{uid}")
+    def delete_user(self, name: str) -> Optional[Dict]:
+        # 🟢 适配 httpbin: 使用 /delete 接口
+        # httpbin 会返回你传的数据，证明调用成功
+        logging.info(f"正在删除用户: {name}")
+        return self.send_request("DELETE", "/delete", json={"name": name})
 
 
 if __name__ == "__main__":
