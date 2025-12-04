@@ -1,0 +1,132 @@
+你好！作为你的面试官导师，我非常欣赏你这种\*\*“自我复盘”\*\*的意识。在编程学习中，“看懂代码”和“写出代码”之间隔着一座喜马拉雅山。你提到的“15%动手率”是一个危险信号，**本周日的实战必须强制将这个比例拉高到 100%**。
+
+为了让你在一天内高效整合前7周的知识（Python基础、OOP、Requests、Pytest、Fixture、DDT、Allure），并结合你的 ODM 背景，我为你设计了一个**模拟实战项目**。
+
+这个项目依然使用公开的 API（避免你自己写后端），但在**业务逻辑上我们将它“伪装”成一个 ODM 产线的设备管理系统**。
+
+-----
+
+### 🚀 周日冲刺项目：ODM 产线设备状态监控系统 (ODM-Device-Monitor)
+
+#### 1\. 项目背景 (模拟场景)
+
+假设你所在的 ODM 工厂开发了一套“设备状态上报系统”。你的任务是编写一套自动化测试框架，验证产线上的设备（Device）能否正常注册、更新固件版本、以及被注销。
+
+  * **底层数据源：** 使用 `Reqres.in` (一个免费的模拟 API)
+  * **业务映射（关键）：** 我们在代码中把“User”强制想象成“Device”。
+      * `Create User` -\> **设备注册 (Register Device)**
+      * `Update User` -\> **固件升级 (Update Firmware)**
+      * `Name` 字段 -\> **设备序列号 (SN)**
+      * `Job` 字段 -\> **固件版本 (Firmware Ver)**
+
+-----
+
+#### 2\. 时间表与执行策略 (全天 8 小时)
+
+**核心原则：所有代码必须手敲，禁止复制粘贴！遇到报错先自己看 Traceback，撑不住了再问 AI。**
+
+##### 🕘 上午 9:00 - 12:00：架构搭建与核心封装 (OOP + Requests)
+
+**目标：** 建立项目骨架，完成 HTTP 基础请求的封装。
+
+  * **Step 1: 初始化与 Git (30分钟)**
+
+      * 创建项目文件夹 `ODM-Device-Monitor`。
+      * `git init`，创建 `.gitignore` (忽略 `__pycache__`, `.pytest_cache`, `venv`).
+      * 创建虚拟环境并安装：`pip install requests pytest pytest-allure-adaptor pyyaml`.
+      * **考核点：** 此时运行 `pip freeze > requirements.txt`。
+
+  * **Step 2: 基础类封装 (OOP实战) (1.5小时)**
+
+      * 创建 `lib/api_client.py`。
+      * 定义 `class ApiClient:`
+      * **必须包含：**
+          * [cite_start]`__init__`: 初始化 `self.session = requests.Session()` [cite: 66]。
+          * `request()` 方法：封装 `try...except` 异常处理，打印日志（请求的 URL、Method、Body）。
+      * **挑战：** 也就是在这里，你要把所有的 `requests.get/post` 统一收拢。
+
+  * **Step 3: 业务类定义 (1小时)**
+
+      * 创建 `api/device_api.py`，继承 `ApiClient`。
+      * 定义方法：
+          * `register_device(sn, firmware_ver)` (对应 POST /api/users)
+          * `update_firmware(device_id, new_ver)` (对应 PUT /api/users/{id})
+          * `get_device_info(device_id)` (对应 GET /api/users/{id})
+
+##### 🕛 中午休息 (补充能量)
+
+##### 🕑 下午 14:00 - 17:00：测试用例构建 (Pytest + Fixture + DDT)
+
+**目标：** 编写真正的测试逻辑，让代码“动”起来。
+
+  * **Step 4: Fixture 固件管理 (1小时)**
+
+      * 创建 `conftest.py`。
+      * **编写 Fixture：** `@pytest.fixture(scope="function")`。
+      * **逻辑：** `create_test_device`。在测试开始前，先调接口创建一个临时设备，把 ID 返回给用例；测试结束后（`yield` 之后），调用删除接口清理它。
+      * [cite_start]**考核点：** 理解 setup/teardown 的闭环 [cite: 73]。
+
+  * **Step 5: 核心业务测试流 (1小时)**
+
+      * 创建 `tests/test_device_lifecycle.py`。
+      * 编写测试用例 `test_firmware_update_flow`：
+        1.  调用注册接口（或者利用 Fixture 获取设备）。
+        2.  调用更新接口修改固件版本。
+        3.  断言响应状态码为 200。
+        4.  断言返回的 JSON 中 `updatedAt` 字段存在。
+
+  * **Step 6: 数据驱动实战 (YAML) (1小时)**
+
+      * 创建 `data/device_data.yaml`。
+      * 内容示例：
+        ```yaml
+        - sn: "SN_2025001"
+          firmware: "v1.0.0"
+        - sn: "SN_2025002"
+          firmware: "v1.0.beta"
+        ```
+      * [cite_start]在测试文件中使用 `@pytest.mark.parametrize` 读取 YAML，驱动“批量注册设备”的测试 [cite: 78]。
+
+##### 🕖 晚上 19:00 - 21:00：报告集成与最终验收
+
+**目标：** 生成漂亮的报告，发朋友圈（或者发给自己）展示成果。
+
+  * **Step 7: 集成 Allure (1小时)**
+
+      * 在用例上添加 `@allure.feature("设备管理模块")`，`@allure.story("固件升级流程")`。
+      * 在 `ApiClient` 的请求方法里，添加 `allure.attach`，把请求体和响应体贴到报告里。
+      * **运行命令：** `pytest --alluredir=./report/tmp`。
+      * [cite_start]**查看报告：** `allure serve ./report/tmp` [cite: 80]。
+
+  * **Step 8: 最终 Code Review (1小时)**
+
+      * 通读全天代码。
+      * 检查点：
+          * 有没有硬编码的 URL？（应该提取到 Config 或常量里）。
+          * 变量命名是否符合 `snake_case`？类名是否 `CamelCase`？
+          * 是否有没用的 `print()`？（应该用 logging）。
+
+-----
+
+#### 3\. 这里的“坑”在哪里？(导师提前透题)
+
+在周日练习时，你大概率会遇到这 3 个问题，提前预警：
+
+1.  **路径报错：** 读取 YAML 文件时，写了相对路径 `open("data/device_data.yaml")`，结果报错 `FileNotFound`。
+      * **提示：** 你的运行目录（Terminal 所在的目录）和代码目录可能不一致。尝试用 `os.path.dirname(__file__)` 拼接绝对路径。
+2.  **Fixture 返回值：** 在用例里用了 fixture，但不知道怎么拿 fixture 返回的数据。
+      * **提示：** 直接把 fixture 的函数名作为参数传给测试用例函数。
+3.  **参数化解包：** YAML 读出来是一个 List，但 parametrize 需要 Tuple 还是 List？
+      * **提示：** 打印出来看看结构，确保传进去的数据格式匹配。
+
+#### 4\. 对 AI 的指令 (Prompt)
+
+当你周日卡住超过 20 分钟时，可以使用以下指令向 AI 求助，但**请要求 AI 只解释思路，不要直接给代码**：
+
+  * “我在封装 Requests 类时，如何设计才能让所有的接口请求自动带上异常捕获？请用文字描述逻辑。”
+  * “在 Pytest 中，我想在 conftest.py 里读取 YAML 文件并设置为全局配置，应该用到哪个 hook 或者 fixture？”
+  * “我的 Allure 报告生成了，但是没有显示具体的请求参数，我应该在代码的哪个位置调用 attach 方法？”
+
+-----
+
+**准备好了吗？这个周日将是你从“看客”变成“赛车手”的第一天。加油！**
